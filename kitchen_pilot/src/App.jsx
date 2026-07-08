@@ -9,6 +9,8 @@ import { IntegrationsPage } from "@/pages/IntegrationsPage";
 import { UnauthorizedPage } from "@/pages/UnauthorizedPage";
 import { ModuleStubPage } from "@/pages/ModuleStubPage";
 import { TablesPage } from "@/pages/TablesPage";
+import { MenuPage } from "@/pages/MenuPage";
+import { SettingsPage } from "@/pages/SettingsPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -37,14 +39,14 @@ export function App() {
             {/* Module Stubs */}
             <Route path="/pos" element={<ModuleStubPage moduleId="pos" />} />
             <Route path="/tables" element={<TablesPage />} />
-            <Route path="/menu" element={<ModuleStubPage moduleId="menu" />} />
+            <Route path="/menu" element={<MenuPage />} />
             <Route path="/kitchen" element={<ModuleStubPage moduleId="kitchen" />} />
             <Route path="/inventory" element={<ModuleStubPage moduleId="inventory" />} />
             <Route path="/customers" element={<ModuleStubPage moduleId="customers" />} />
             <Route path="/finance" element={<ModuleStubPage moduleId="finance" />} />
             <Route path="/reports" element={<ModuleStubPage moduleId="reports" />} />
             <Route path="/ai" element={<ModuleStubPage moduleId="ai" />} />
-            <Route path="/settings" element={<ModuleStubPage moduleId="settings" />} />
+            <Route path="/settings" element={<SettingsPage />} />
           </Route>
 
           {/* Fallback Redirect */}

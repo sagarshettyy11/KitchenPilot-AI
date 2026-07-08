@@ -61,7 +61,6 @@ export const MODULES = [
     path: "/menu",
     icon: Utensils,
     roles: ["super_admin", "owner", "manager", "kitchen", "inventory"],
-    badge: "Soon",
   },
   {
     id: "kitchen",
@@ -124,7 +123,6 @@ export const MODULES = [
     path: "/settings",
     icon: Settings,
     roles: ["super_admin", "owner", "manager"],
-    badge: "Soon",
   },
 ];
 
