@@ -8,6 +8,7 @@ import { DashboardPage } from "@/pages/DashboardPage";
 import { IntegrationsPage } from "@/pages/IntegrationsPage";
 import { UnauthorizedPage } from "@/pages/UnauthorizedPage";
 import { ModuleStubPage } from "@/pages/ModuleStubPage";
+import { TablesPage } from "@/pages/TablesPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -35,7 +36,7 @@ export function App() {
 
             {/* Module Stubs */}
             <Route path="/pos" element={<ModuleStubPage moduleId="pos" />} />
-            <Route path="/tables" element={<ModuleStubPage moduleId="tables" />} />
+            <Route path="/tables" element={<TablesPage />} />
             <Route path="/menu" element={<ModuleStubPage moduleId="menu" />} />
             <Route path="/kitchen" element={<ModuleStubPage moduleId="kitchen" />} />
             <Route path="/inventory" element={<ModuleStubPage moduleId="inventory" />} />

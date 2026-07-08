@@ -54,7 +54,6 @@ export const MODULES = [
     path: "/tables",
     icon: Table,
     roles: ["super_admin", "owner", "manager", "waiter", "cashier"],
-    badge: "Soon",
   },
   {
     id: "menu",

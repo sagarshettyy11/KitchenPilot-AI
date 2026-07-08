@@ -1,8 +1,10 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { Button } from "@/components/ui/button";
 import hero from "@/assets/hero.jpg";
+import { supabase } from "@/integrations/supabase/client";
 import {
   ShoppingCart,
   ChefHat,
@@ -21,22 +23,36 @@ import {
 } from "lucide-react";
 
 export function LandingPage() {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user);
+    });
+
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <Hero />
+      <Hero user={user} />
       <Logos />
       <Features />
       <Modules />
-      <Pricing />
+      <Pricing user={user} />
       <FAQ />
-      <CTA />
+      <CTA user={user} />
       <Footer />
     </div>
   );
 }
 
-function Hero() {
+function Hero({ user }) {
   return (
     <section className="relative overflow-hidden pt-16 pb-24 md:pt-24 md:pb-32 bg-mesh">
       <div className="mx-auto max-w-7xl px-6">
@@ -59,8 +75,8 @@ function Hero() {
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Button asChild size="lg" className="rounded-full px-6">
-              <Link to="/auth">
-                Start 14-day free trial <ArrowRight className="ml-1 h-4 w-4" />
+              <Link to={user ? "/dashboard" : "/auth"}>
+                {user ? "Go to Dashboard" : "Start 14-day free trial"} <ArrowRight className="ml-1 h-4 w-4" />
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="rounded-full px-6">
@@ -235,7 +251,7 @@ function Modules() {
   );
 }
 
-function Pricing() {
+function Pricing({ user }) {
   const tiers = [
     {
       n: "Starter",
@@ -311,7 +327,9 @@ function Pricing() {
                 className="mt-6 w-full rounded-xl"
                 variant={t.highlight ? "default" : "outline"}
               >
-                <Link to="/auth">Get started</Link>
+                <Link to={user ? "/dashboard" : "/auth"}>
+                  {user ? "Go to Dashboard" : "Get started"}
+                </Link>
               </Button>
             </div>
           ))}
@@ -362,7 +380,7 @@ function FAQ() {
   );
 }
 
-function CTA() {
+function CTA({ user }) {
   return (
     <section className="py-24">
       <div className="mx-auto max-w-5xl px-6">
@@ -372,11 +390,11 @@ function CTA() {
             Ready to run a better restaurant?
           </h2>
           <p className="mt-3 max-w-xl text-white/90">
-            Set up in minutes. Free for 14 days. No credit card required.
+            {user ? "Jump back into your restaurant dashboard." : "Set up in minutes. Free for 14 days. No credit card required."}
           </p>
           <Button asChild size="lg" variant="secondary" className="mt-8 rounded-full px-6">
-            <Link to="/auth">
-              Start your free trial <ArrowRight className="ml-1 h-4 w-4" />
+            <Link to={user ? "/dashboard" : "/auth"}>
+              {user ? "Go to Dashboard" : "Start your free trial"} <ArrowRight className="ml-1 h-4 w-4" />
             </Link>
           </Button>
         </div>
