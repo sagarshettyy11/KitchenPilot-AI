@@ -551,22 +551,24 @@ function ConnectDialog({ provider, restaurantId, existing, onClose }) {
 
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <Label htmlFor="api">API key</Label>
+            <Label htmlFor={`api-${provider.id}`}>API key</Label>
             <Input
-              id="api"
+              id={`api-${provider.id}`}
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               placeholder="pk_live_…"
+              autoComplete="off"
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="sec">Secret key</Label>
+            <Label htmlFor={`sec-${provider.id}`}>Secret key</Label>
             <Input
-              id="sec"
+              id={`sec-${provider.id}`}
               type="password"
               value={secretKey}
               onChange={(e) => setSecretKey(e.target.value)}
               placeholder="sk_live_…"
+              autoComplete="new-password"
             />
           </div>
           <div className="space-y-1.5">
