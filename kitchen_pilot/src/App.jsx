@@ -11,6 +11,8 @@ import { ModuleStubPage } from "@/pages/ModuleStubPage";
 import { ReportsPage } from "@/pages/ReportsPage";
 import { CustomersPage } from "@/pages/CustomersPage";
 import { FinancePage } from "@/pages/FinancePage";
+import { KitchenPage } from "@/pages/KitchenPage";
+import { InventoryPage } from "@/pages/InventoryPage";
 import { TablesPage } from "@/pages/TablesPage";
 import { MenuPage } from "@/pages/MenuPage";
 import { SettingsPage } from "@/pages/SettingsPage";
@@ -43,8 +45,8 @@ export function App() {
             <Route path="/pos" element={<ModuleStubPage moduleId="pos" />} />
             <Route path="/tables" element={<TablesPage />} />
             <Route path="/menu" element={<MenuPage />} />
-            <Route path="/kitchen" element={<ModuleStubPage moduleId="kitchen" />} />
-            <Route path="/inventory" element={<ModuleStubPage moduleId="inventory" />} />
+            <Route path="/kitchen" element={<KitchenPage />} />
+            <Route path="/inventory" element={<InventoryPage />} />
             <Route path="/customers" element={<CustomersPage />} />
             <Route path="/finance" element={<FinancePage />} />
             <Route path="/reports" element={<ReportsPage />} />
