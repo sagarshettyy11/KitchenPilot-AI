@@ -100,7 +100,6 @@ export const MODULES = [
     path: "/reports",
     icon: LineChart,
     roles: ["super_admin", "owner", "manager", "accountant"],
-    badge: "Soon",
   },
   {
     id: "integrations",

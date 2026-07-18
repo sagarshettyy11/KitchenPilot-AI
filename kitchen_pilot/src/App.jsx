@@ -8,6 +8,7 @@ import { DashboardPage } from "@/pages/DashboardPage";
 import { IntegrationsPage } from "@/pages/IntegrationsPage";
 import { UnauthorizedPage } from "@/pages/UnauthorizedPage";
 import { ModuleStubPage } from "@/pages/ModuleStubPage";
+import { ReportsPage } from "@/pages/ReportsPage";
 import { TablesPage } from "@/pages/TablesPage";
 import { MenuPage } from "@/pages/MenuPage";
 import { SettingsPage } from "@/pages/SettingsPage";
@@ -44,7 +45,7 @@ export function App() {
             <Route path="/inventory" element={<ModuleStubPage moduleId="inventory" />} />
             <Route path="/customers" element={<ModuleStubPage moduleId="customers" />} />
             <Route path="/finance" element={<ModuleStubPage moduleId="finance" />} />
-            <Route path="/reports" element={<ModuleStubPage moduleId="reports" />} />
+            <Route path="/reports" element={<ReportsPage />} />
             <Route path="/ai" element={<ModuleStubPage moduleId="ai" />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Route>
