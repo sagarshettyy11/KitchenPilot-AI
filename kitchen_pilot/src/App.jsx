@@ -9,6 +9,7 @@ import { IntegrationsPage } from "@/pages/IntegrationsPage";
 import { UnauthorizedPage } from "@/pages/UnauthorizedPage";
 import { ModuleStubPage } from "@/pages/ModuleStubPage";
 import { ReportsPage } from "@/pages/ReportsPage";
+import { POSPage } from "@/pages/POSPage";
 import { CustomersPage } from "@/pages/CustomersPage";
 import { FinancePage } from "@/pages/FinancePage";
 import { KitchenPage } from "@/pages/KitchenPage";
@@ -42,7 +43,7 @@ export function App() {
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
             {/* Module Stubs */}
-            <Route path="/pos" element={<ModuleStubPage moduleId="pos" />} />
+            <Route path="/pos" element={<POSPage />} />
             <Route path="/tables" element={<TablesPage />} />
             <Route path="/menu" element={<MenuPage />} />
             <Route path="/kitchen" element={<KitchenPage />} />

@@ -397,9 +397,9 @@ function InventoryPageContent() {
       </div>
 
       {/* Filter and Search Controls */}
-      <div className="rounded-2xl border border-border/60 bg-card p-4 flex flex-col lg:flex-row items-center gap-4 justify-between">
-        <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-          <div className="relative flex-1 sm:flex-initial sm:w-64">
+      <div className="rounded-2xl border border-border/60 bg-card p-4 flex items-center justify-between">
+        <div className="flex flex-row flex-wrap items-center gap-3 w-full">
+          <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="text"
@@ -410,7 +410,7 @@ function InventoryPageContent() {
             />
           </div>
 
-          <div className="w-full sm:w-40">
+          <div className="w-48">
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger className="rounded-xl border-border/60 text-xs h-9">
                 <SelectValue placeholder="All Categories" />
@@ -426,7 +426,7 @@ function InventoryPageContent() {
             </Select>
           </div>
 
-          <div className="w-full sm:w-40">
+          <div className="w-48">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="rounded-xl border-border/60 text-xs h-9">
                 <SelectValue placeholder="All Statuses" />

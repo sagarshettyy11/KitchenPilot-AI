@@ -45,8 +45,7 @@ export const MODULES = [
     label: "POS",
     path: "/pos",
     icon: ShoppingCart,
-    roles: ["super_admin", "owner", "manager", "cashier", "waiter"],
-    badge: "Soon",
+    roles: ["super_admin", "owner", "manager", "cashier"],
   },
   {
     id: "tables",
