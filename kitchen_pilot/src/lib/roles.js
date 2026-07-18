@@ -84,7 +84,6 @@ export const MODULES = [
     path: "/customers",
     icon: Users,
     roles: ["super_admin", "owner", "manager", "cashier"],
-    badge: "Soon",
   },
   {
     id: "finance",
@@ -92,7 +91,6 @@ export const MODULES = [
     path: "/finance",
     icon: Wallet,
     roles: ["super_admin", "owner", "accountant"],
-    badge: "Soon",
   },
   {
     id: "reports",
