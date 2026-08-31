@@ -75,7 +75,11 @@ export function AdminLoginPage() {
       toast.success("Authenticated as SuperAdmin! Welcome back.");
       navigate("/admin/dashboard", { replace: true });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Authentication failed");
+      console.error("Admin sign-in error:", err);
+      const msg =
+        err?.message ||
+        (typeof err === "string" ? err : "Authentication failed. Please verify your credentials.");
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

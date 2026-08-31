@@ -70,6 +70,7 @@ export function App() {
             <Route path="/inventory" element={<InventoryPage />} />
             <Route path="/customers" element={<CustomersPage />} />
             <Route path="/finance" element={<FinancePage />} />
+            <Route path="/expenses" element={<FinancePage />} />
             <Route path="/reports" element={<ReportsPage />} />
             <Route path="/ai" element={<ModuleStubPage moduleId="ai" />} />
             <Route path="/settings" element={<SettingsPage />} />

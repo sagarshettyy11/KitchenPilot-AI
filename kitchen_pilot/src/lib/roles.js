@@ -84,10 +84,10 @@ export const MODULES = [
   },
   {
     id: "finance",
-    label: "Finance",
+    label: "Expenses & Finance",
     path: "/finance",
     icon: Wallet,
-    roles: ["super_admin", "owner", "accountant"],
+    roles: ["super_admin", "owner", "manager", "accountant"],
   },
   {
     id: "reports",

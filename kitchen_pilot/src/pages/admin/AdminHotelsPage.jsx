@@ -1,5 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,7 +57,10 @@ import {
   Layers,
   Save,
   Check,
-  Power
+  Power,
+  Wand2,
+  Store,
+  RefreshCw
 } from "lucide-react";
 
 const ALL_AVAILABLE_MODULES = [
@@ -73,7 +77,14 @@ const ALL_AVAILABLE_MODULES = [
   { id: "settings", name: "Hotel Settings", icon: Settings, desc: "General profile, taxes & store setup" },
 ];
 
+const PRESETS = {
+  starter: ["pos", "tables", "menu", "kitchen", "reports", "settings"],
+  pro: ["pos", "tables", "menu", "kitchen", "inventory", "customers", "reports", "integrations", "ai", "settings"],
+  enterprise: ["pos", "tables", "menu", "kitchen", "inventory", "customers", "finance", "reports", "integrations", "ai", "settings"],
+};
+
 export function AdminHotelsPage() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPlan, setSelectedPlan] = useState("all");
@@ -84,6 +95,7 @@ export function AdminHotelsPage() {
   const [provisionDrawerOpen, setProvisionDrawerOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [activeHotel, setActiveHotel] = useState(null);
+  const [seedingLoading, setSeedingLoading] = useState(false);
 
   // New hotel form state
   const [newHotel, setNewHotel] = useState({
@@ -100,7 +112,7 @@ export function AdminHotelsPage() {
     status: "active",
     max_tables: 40,
     max_staff: 20,
-    enabled_modules: ALL_AVAILABLE_MODULES.map((m) => m.id),
+    enabled_modules: PRESETS.pro,
   });
 
   // Fetch all restaurants
@@ -115,6 +127,25 @@ export function AdminHotelsPage() {
       return data ?? [];
     },
   });
+
+  // Realtime subscription on restaurants
+  useEffect(() => {
+    const channel = supabase
+      .channel("admin-hotels-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "restaurants" },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["admin-hotels-list"] });
+          queryClient.invalidateQueries({ queryKey: ["admin-all-restaurants"] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   // Filtered hotels
   const filteredHotels = useMemo(() => {
@@ -180,7 +211,6 @@ export function AdminHotelsPage() {
       toast.success(`Hotel "${data.name}" successfully onboarded!`);
       setOnboardModalOpen(false);
       queryClient.invalidateQueries({ queryKey: ["admin-hotels-list"] });
-      queryClient.invalidateQueries({ queryKey: ["admin-all-restaurants"] });
     },
     onError: (err) => {
       toast.error(err instanceof Error ? err.message : "Failed to onboard hotel");
@@ -233,7 +263,6 @@ export function AdminHotelsPage() {
       toast.success("Hotel settings & module provisioning updated!");
       setProvisionDrawerOpen(false);
       queryClient.invalidateQueries({ queryKey: ["admin-hotels-list"] });
-      queryClient.invalidateQueries({ queryKey: ["admin-all-restaurants"] });
     },
     onError: (err) => {
       toast.error(err instanceof Error ? err.message : "Failed to update hotel");
@@ -261,12 +290,75 @@ export function AdminHotelsPage() {
       setDeleteConfirmOpen(false);
       setActiveHotel(null);
       queryClient.invalidateQueries({ queryKey: ["admin-hotels-list"] });
-      queryClient.invalidateQueries({ queryKey: ["admin-all-restaurants"] });
     },
     onError: (err) => {
       toast.error(err instanceof Error ? err.message : "Failed to delete hotel");
     },
   });
+
+  // Seed Starter Menu & Tables for a Hotel
+  async function handleSeedDemoData(hotelId, hotelName) {
+    setSeedingLoading(true);
+    try {
+      // 1. Create categories
+      const { data: startersCat } = await supabase
+        .from("menu_categories")
+        .insert({ restaurant_id: hotelId, name: "Starters & Appetizers", display_order: 1 })
+        .select()
+        .single();
+
+      const { data: mainsCat } = await supabase
+        .from("menu_categories")
+        .insert({ restaurant_id: hotelId, name: "Main Course Specialties", display_order: 2 })
+        .select()
+        .single();
+
+      const { data: drinksCat } = await supabase
+        .from("menu_categories")
+        .insert({ restaurant_id: hotelId, name: "Beverages & Mocktails", display_order: 3 })
+        .select()
+        .single();
+
+      // 2. Create menu items
+      if (startersCat?.id) {
+        await supabase.from("menu_items").insert([
+          { restaurant_id: hotelId, category_id: startersCat.id, name: "Crispy Paneer Bites", price: 249, is_veg: true, is_available: true },
+          { restaurant_id: hotelId, category_id: startersCat.id, name: "Smoky BBQ Chicken Wings", price: 329, is_veg: false, is_available: true },
+        ]);
+      }
+
+      if (mainsCat?.id) {
+        await supabase.from("menu_items").insert([
+          { restaurant_id: hotelId, category_id: mainsCat.id, name: "Chef's Special Biryani", price: 399, is_veg: false, is_available: true },
+          { restaurant_id: hotelId, category_id: mainsCat.id, name: "Truffle Butter Pasta", price: 349, is_veg: true, is_available: true },
+        ]);
+      }
+
+      if (drinksCat?.id) {
+        await supabase.from("menu_items").insert([
+          { restaurant_id: hotelId, category_id: drinksCat.id, name: "Classic Mint Mojito", price: 179, is_veg: true, is_available: true },
+          { restaurant_id: hotelId, category_id: drinksCat.id, name: "Cold Brew Iced Coffee", price: 199, is_veg: true, is_available: true },
+        ]);
+      }
+
+      // 3. Create tables
+      const tablesToInsert = Array.from({ length: 6 }, (_, i) => ({
+        restaurant_id: hotelId,
+        table_number: `T-${i + 1}`,
+        capacity: i % 2 === 0 ? 4 : 2,
+        status: "available",
+      }));
+      await supabase.from("tables").insert(tablesToInsert);
+
+      toast.success(`Seeded demo menu categories, items, and tables for "${hotelName}"!`);
+      queryClient.invalidateQueries({ queryKey: ["admin-total-tables-count"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-total-menu-items-count"] });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to seed demo data");
+    } finally {
+      setSeedingLoading(false);
+    }
+  }
 
   function openProvisioning(hotel) {
     setActiveHotel({
@@ -278,6 +370,16 @@ export function AdminHotelsPage() {
       max_staff: hotel.max_staff || 20,
     });
     setProvisionDrawerOpen(true);
+  }
+
+  function applyPreset(presetKey) {
+    if (!activeHotel || !PRESETS[presetKey]) return;
+    setActiveHotel({
+      ...activeHotel,
+      plan_tier: presetKey,
+      enabled_modules: PRESETS[presetKey],
+    });
+    toast.info(`Applied ${presetKey.toUpperCase()} module preset!`);
   }
 
   function toggleModule(moduleId) {
@@ -299,6 +401,12 @@ export function AdminHotelsPage() {
     setNewHotel({ ...newHotel, enabled_modules: updated });
   }
 
+  function launchHotel(hotel) {
+    localStorage.setItem("kitchenpilot_selected_hotel", JSON.stringify(hotel));
+    toast.success(`Switched context to ${hotel.name}! Launching portal...`);
+    navigate("/dashboard");
+  }
+
   return (
     <div className="flex flex-col gap-6 pb-12">
       {/* Page Header */}
@@ -309,7 +417,7 @@ export function AdminHotelsPage() {
             Hotels & Feature Provisioning
           </h1>
           <p className="text-sm text-slate-400 mt-1">
-            Centrally manage hotel accounts, allocate feature tiers, and toggle module permissions.
+            Centrally manage hotel accounts, allocate feature tiers, and toggle module permissions with live sync.
           </p>
         </div>
 
@@ -382,7 +490,7 @@ export function AdminHotelsPage() {
                   <tr>
                     <td colSpan={6} className="px-6 py-12 text-center text-slate-400">
                       <Loader2 className="h-6 w-6 animate-spin mx-auto text-indigo-500 mb-2" />
-                      Loading hotel records...
+                      Loading live hotel records...
                     </td>
                   </tr>
                 ) : filteredHotels.length === 0 ? (
@@ -481,7 +589,20 @@ export function AdminHotelsPage() {
                         </td>
 
                         <td className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
+                          <div className="flex items-center justify-end gap-1.5">
+                            {/* Launch Hotel View */}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => launchHotel(hotel)}
+                              title="Open Hotel Portal"
+                              className="h-8 rounded-xl border-slate-800 bg-slate-900 text-slate-300 hover:text-white hover:border-slate-700 text-xs gap-1"
+                            >
+                              <Store className="h-3.5 w-3.5 text-emerald-400" />
+                              <span className="hidden sm:inline">Launch</span>
+                            </Button>
+
+                            {/* Provision Features */}
                             <Button
                               size="sm"
                               onClick={() => openProvisioning(hotel)}
@@ -490,6 +611,7 @@ export function AdminHotelsPage() {
                               <Sliders className="h-3.5 w-3.5" /> Provision
                             </Button>
 
+                            {/* Delete Button */}
                             <Button
                               size="sm"
                               variant="outline"
@@ -582,7 +704,10 @@ export function AdminHotelsPage() {
               <Label className="text-xs font-semibold text-slate-300">Plan Tier</Label>
               <Select
                 value={newHotel.plan_tier}
-                onValueChange={(val) => setNewHotel({ ...newHotel, plan_tier: val })}
+                onValueChange={(val) => {
+                  const preset = PRESETS[val] || PRESETS.pro;
+                  setNewHotel({ ...newHotel, plan_tier: val, enabled_modules: preset });
+                }}
               >
                 <SelectTrigger className="h-10 rounded-xl bg-slate-900 border-slate-800 text-xs">
                   <SelectValue />
@@ -711,9 +836,9 @@ export function AdminHotelsPage() {
             </DialogHeader>
 
             <Tabs defaultValue="modules" className="w-full">
-              <TabsList className="bg-slate-900 border border-slate-800/80 p-1 rounded-2xl w-full grid grid-cols-3">
+              <TabsList className="bg-slate-900 border border-slate-800/80 p-1 rounded-2xl w-full grid grid-cols-4">
                 <TabsTrigger value="modules" className="text-xs font-medium rounded-xl data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
-                  Feature Modules ({activeHotel.enabled_modules?.length || 0})
+                  Modules ({activeHotel.enabled_modules?.length || 0})
                 </TabsTrigger>
                 <TabsTrigger value="plan" className="text-xs font-medium rounded-xl data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
                   Plan & Quotas
@@ -721,30 +846,48 @@ export function AdminHotelsPage() {
                 <TabsTrigger value="details" className="text-xs font-medium rounded-xl data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
                   Hotel Info
                 </TabsTrigger>
+                <TabsTrigger value="tools" className="text-xs font-medium rounded-xl data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
+                  Data Tools
+                </TabsTrigger>
               </TabsList>
 
               {/* Feature Modules Tab */}
               <TabsContent value="modules" className="mt-4 space-y-4">
-                <div className="flex items-center justify-between bg-indigo-950/30 border border-indigo-800/40 p-3 rounded-2xl">
+                <div className="flex flex-wrap items-center justify-between gap-2 bg-indigo-950/30 border border-indigo-800/40 p-3 rounded-2xl">
                   <div className="flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-indigo-400" />
+                    <Sparkles className="h-4 w-4 text-indigo-400 shrink-0" />
                     <span className="text-xs text-indigo-200 font-medium">
-                      Toggle modules on or off. Disabled modules will disappear instantly from this hotel&apos;s app.
+                      Quick Module Presets:
                     </span>
                   </div>
-                  <div className="flex gap-2">
-                    <button
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
                       type="button"
-                      onClick={() =>
-                        setActiveHotel({
-                          ...activeHotel,
-                          enabled_modules: ALL_AVAILABLE_MODULES.map((m) => m.id),
-                        })
-                      }
-                      className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold"
+                      onClick={() => applyPreset("starter")}
+                      className="h-7 text-[11px] rounded-lg border-slate-800 bg-slate-900 hover:bg-slate-800 text-slate-300"
                     >
-                      Enable All
-                    </button>
+                      Starter
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      type="button"
+                      onClick={() => applyPreset("pro")}
+                      className="h-7 text-[11px] rounded-lg border-indigo-800 bg-indigo-950/50 hover:bg-indigo-900 text-indigo-300"
+                    >
+                      Pro
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      type="button"
+                      onClick={() => applyPreset("enterprise")}
+                      className="h-7 text-[11px] rounded-lg border-purple-800 bg-purple-950/50 hover:bg-purple-900 text-purple-300"
+                    >
+                      Enterprise (All)
+                    </Button>
                   </div>
                 </div>
 
@@ -907,6 +1050,53 @@ export function AdminHotelsPage() {
                       onChange={(e) => setActiveHotel({ ...activeHotel, gst_number: e.target.value })}
                       className="h-10 rounded-xl bg-slate-900 border-slate-800 text-xs"
                     />
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* Data Tools Tab */}
+              <TabsContent value="tools" className="mt-4 space-y-4">
+                <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-bold text-white flex items-center gap-2">
+                        <Wand2 className="h-4 w-4 text-indigo-400" />
+                        Seed Starter Menu & Tables
+                      </p>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        Instantly populates this hotel with standard categories, menu items, and dining tables.
+                      </p>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => handleSeedDemoData(activeHotel.id, activeHotel.name)}
+                      disabled={seedingLoading}
+                      className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs rounded-xl"
+                    >
+                      {seedingLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Seed Data"}
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-bold text-white flex items-center gap-2">
+                        <Store className="h-4 w-4 text-emerald-400" />
+                        Launch Hotel Experience
+                      </p>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        Opens the restaurant portal directly in the context of this specific hotel.
+                      </p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => launchHotel(activeHotel)}
+                      className="border-slate-700 bg-slate-800 text-emerald-400 hover:text-emerald-300 text-xs rounded-xl"
+                    >
+                      Launch Now
+                    </Button>
                   </div>
                 </div>
               </TabsContent>
