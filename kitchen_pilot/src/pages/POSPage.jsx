@@ -295,16 +295,23 @@ function POSPageContent() {
         price: i.price
       }));
 
+      const subtotal = cartTotals.subtotal || cartTotals.total;
+      const total = cartTotals.total;
+      const extOrderId = `POS-${Math.floor(100000 + Math.random() * 900000)}`;
+
       const { data, error } = await supabase
         .from("delivery_orders")
         .insert({
           restaurant_id: restaurantId,
-          provider: null, // Offline channel
-          type: "offline",
-          channel: orderType,
+          provider: "pos",
+          type: "pos",
+          channel: orderType || "dine-in",
+          external_order_id: extOrderId,
           customer_name: customerName.trim() || "Walk-in Guest",
+          customer_phone: customerPhone.trim() || null,
           placed_at: new Date().toISOString(),
-          total: cartTotals.total,
+          subtotal: subtotal,
+          total: total,
           commission: 0,
           payment_mode: paymentMode,
           payment_status: "paid",

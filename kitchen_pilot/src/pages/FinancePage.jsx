@@ -14,7 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import {
   Wallet,
@@ -26,27 +25,24 @@ import {
   Calendar,
   Filter,
   Sparkles,
-  ArrowUpRight,
-  ArrowDownRight,
   FileSpreadsheet,
   Building2,
   Users2,
-  UtensilsCrossed,
   Clock,
   CheckCircle2,
   Boxes,
   PieChart as PieChartIcon,
   BarChart3,
   Search,
-  Download,
   IndianRupee,
   Receipt,
   Layers,
-  ArrowRight,
   Sliders,
   DollarSign,
   Loader2,
-  CreditCard
+  CreditCard,
+  Tag,
+  ArrowRight
 } from "lucide-react";
 import {
   AreaChart,
@@ -301,7 +297,6 @@ export function FinancePage() {
     });
 
     // Daily chart data
-    const daysInMonth = selectedMonth !== "all" ? 31 : 12;
     const dailyChartData = [];
     if (selectedMonth !== "all") {
       const [year, month] = selectedMonth.split("-").map(Number);
@@ -385,20 +380,23 @@ export function FinancePage() {
 
   return (
     <div className="flex flex-col gap-6 p-4 md:p-6 lg:p-8 max-w-7xl mx-auto w-full pb-16">
-      {/* Top Banner / Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-indigo-950/40 via-card to-brand/10 p-6 rounded-3xl border border-border/70 shadow-sm relative overflow-hidden">
+      {/* Top Banner / Header (Clean, crisp, light & dark theme compatible) */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 bg-card p-6 md:p-7 rounded-3xl border border-border shadow-sm relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-80 h-full bg-gradient-to-l from-brand/5 via-transparent to-transparent pointer-events-none" />
         <div className="flex flex-col gap-1.5 z-10">
-          <div className="flex items-center gap-2">
-            <Wallet className="h-6 w-6 text-brand" />
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-2xl bg-brand/10 text-brand border border-brand/20">
+              <Wallet className="h-6 w-6" />
+            </div>
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-foreground">
               Business Expense Tracker
             </h1>
-            <Badge variant="outline" className="bg-brand/10 text-brand border-brand/20 text-xs font-semibold">
+            <Badge variant="outline" className="bg-brand/10 text-brand border-brand/20 text-xs font-semibold px-2.5 py-0.5">
               Live Tracker
             </Badge>
           </div>
-          <p className="text-sm text-muted-foreground max-w-xl">
-            Select items from your master catalog or log custom expenses. Track monthly burn, visual distributions, and export to Excel.
+          <p className="text-sm text-muted-foreground max-w-xl mt-1">
+            Pick from your master catalog or log custom expenses. Track monthly burn, visual distributions, and export to Excel.
           </p>
         </div>
 
@@ -407,7 +405,7 @@ export function FinancePage() {
           <Button
             variant="outline"
             onClick={() => setMasterModalOpen(true)}
-            className="rounded-xl border-border bg-card/80 hover:bg-muted text-xs font-semibold gap-1.5 h-10 shadow-sm"
+            className="rounded-xl border-border bg-background hover:bg-muted text-xs font-semibold gap-1.5 h-10 px-4 shadow-sm"
           >
             <Boxes className="h-4 w-4 text-brand" />
             Master Catalog ({masterItems.length})
@@ -416,15 +414,15 @@ export function FinancePage() {
           <Button
             onClick={handleExcelExport}
             variant="outline"
-            className="rounded-xl border-emerald-600/30 bg-emerald-950/20 hover:bg-emerald-950/40 text-emerald-400 text-xs font-semibold gap-1.5 h-10 shadow-sm"
+            className="rounded-xl border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold gap-1.5 h-10 px-4 shadow-sm transition-all"
           >
-            <FileSpreadsheet className="h-4 w-4 text-emerald-400" />
+            <FileSpreadsheet className="h-4 w-4" />
             Export to Excel
           </Button>
 
           <Button
             onClick={handleOpenNewExpense}
-            className="rounded-xl bg-brand text-brand-foreground hover:bg-brand/90 text-xs font-semibold gap-1.5 h-10 shadow-md shadow-brand/20"
+            className="rounded-xl bg-brand text-brand-foreground hover:bg-brand/90 text-xs font-semibold gap-1.5 h-10 px-5 shadow-md shadow-brand/20 transition-all"
           >
             <Plus className="h-4 w-4" />
             + Log Expense
@@ -433,14 +431,14 @@ export function FinancePage() {
       </div>
 
       {/* Month Selector & Quick Filters */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-card p-4 rounded-2xl border border-border/80 shadow-sm">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-card p-4 rounded-2xl border border-border shadow-sm">
+        <div className="flex items-center gap-2.5">
           <Calendar className="h-4 w-4 text-brand shrink-0" />
           <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            Analysis Period:
+            Analysis Cycle:
           </span>
           <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger className="w-[220px] rounded-xl h-10 text-xs font-semibold bg-muted/50 border-border">
+            <SelectTrigger className="w-[230px] rounded-xl h-10 text-xs font-semibold bg-muted/40 border-border">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="max-h-72">
@@ -454,14 +452,14 @@ export function FinancePage() {
         </div>
 
         <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
-          <span>Displaying <strong className="text-foreground">{monthlyExpenses.length}</strong> expense records</span>
+          <span>Active Period: <strong className="text-foreground">{monthlyExpenses.length}</strong> logged entries</span>
         </div>
       </div>
 
       {/* Monthly Statistics KPI Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Monthly Expenses */}
-        <Card className="rounded-2xl border-border/80 shadow-sm overflow-hidden relative">
+        <Card className="rounded-2xl border-border shadow-sm overflow-hidden relative">
           <div className="absolute top-0 right-0 w-20 h-20 bg-rose-500/5 rounded-full blur-xl pointer-events-none" />
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -482,7 +480,7 @@ export function FinancePage() {
         </Card>
 
         {/* Daily Average Expense */}
-        <Card className="rounded-2xl border-border/80 shadow-sm overflow-hidden relative">
+        <Card className="rounded-2xl border-border shadow-sm overflow-hidden relative">
           <div className="absolute top-0 right-0 w-20 h-20 bg-amber-500/5 rounded-full blur-xl pointer-events-none" />
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -503,7 +501,7 @@ export function FinancePage() {
         </Card>
 
         {/* Top Spending Category */}
-        <Card className="rounded-2xl border-border/80 shadow-sm overflow-hidden relative">
+        <Card className="rounded-2xl border-border shadow-sm overflow-hidden relative">
           <div className="absolute top-0 right-0 w-20 h-20 bg-indigo-500/5 rounded-full blur-xl pointer-events-none" />
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -527,8 +525,8 @@ export function FinancePage() {
           </CardContent>
         </Card>
 
-        {/* Net Profit/Loss Margin */}
-        <Card className="rounded-2xl border-border/80 shadow-sm overflow-hidden relative">
+        {/* Net Financial Balance */}
+        <Card className="rounded-2xl border-border shadow-sm overflow-hidden relative">
           <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/5 rounded-full blur-xl pointer-events-none" />
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -556,7 +554,7 @@ export function FinancePage() {
       {/* Visual Graphs on the Same Page (Daily Spend & Category Pie) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Daily Expense Trend Graph */}
-        <Card className="lg:col-span-2 rounded-3xl border-border/80 shadow-sm overflow-hidden">
+        <Card className="lg:col-span-2 rounded-3xl border-border shadow-sm overflow-hidden">
           <CardHeader className="border-b border-border/60 pb-4">
             <div className="flex items-center justify-between">
               <div>
@@ -609,7 +607,7 @@ export function FinancePage() {
         </Card>
 
         {/* Category Breakdown Donut / Pie Chart */}
-        <Card className="rounded-3xl border-border/80 shadow-sm overflow-hidden">
+        <Card className="rounded-3xl border-border shadow-sm overflow-hidden">
           <CardHeader className="border-b border-border/60 pb-4">
             <CardTitle className="text-base font-bold flex items-center gap-2">
               <PieChartIcon className="h-4 w-4 text-brand" />
@@ -687,7 +685,7 @@ export function FinancePage() {
       </div>
 
       {/* Detailed Expense Transactions Table */}
-      <Card className="rounded-3xl border-border/80 shadow-sm overflow-hidden">
+      <Card className="rounded-3xl border-border shadow-sm overflow-hidden">
         <CardHeader className="border-b border-border/60 pb-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
@@ -708,12 +706,12 @@ export function FinancePage() {
                   placeholder="Search item, vendor, remarks..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="h-9 rounded-xl pl-9 text-xs"
+                  className="h-9 rounded-xl pl-9 text-xs bg-muted/40 border-border"
                 />
               </div>
 
               <Select value={filterCategory} onValueChange={setFilterCategory}>
-                <SelectTrigger className="w-[140px] h-9 rounded-xl text-xs">
+                <SelectTrigger className="w-[140px] h-9 rounded-xl text-xs bg-muted/40 border-border">
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -727,7 +725,7 @@ export function FinancePage() {
               </Select>
 
               <Select value={filterPaymentMode} onValueChange={setFilterPaymentMode}>
-                <SelectTrigger className="w-[120px] h-9 rounded-xl text-xs">
+                <SelectTrigger className="w-[120px] h-9 rounded-xl text-xs bg-muted/40 border-border">
                   <SelectValue placeholder="Payment" />
                 </SelectTrigger>
                 <SelectContent>
