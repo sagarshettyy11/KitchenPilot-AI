@@ -66,5 +66,8 @@ desktop.ini
 *.sln
 *.sw?
 *.sublime-project
-*.sublime-workspace
-.history/
+# Agent & IDE local configs (contains sensitive credentials)
+.agents/
+.agent/
+_agents/
+_agent/

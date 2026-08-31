@@ -18,6 +18,15 @@ import { TablesPage } from "@/pages/TablesPage";
 import { MenuPage } from "@/pages/MenuPage";
 import { SettingsPage } from "@/pages/SettingsPage";
 
+// Admin Portal Imports
+import { AdminLoginPage } from "@/pages/admin/AdminLoginPage";
+import { AdminLayout } from "@/layouts/AdminLayout";
+import { AdminDashboardPage } from "@/pages/admin/AdminDashboardPage";
+import { AdminHotelsPage } from "@/pages/admin/AdminHotelsPage";
+import { AdminUsersPage } from "@/pages/admin/AdminUsersPage";
+import { AdminAuditPage } from "@/pages/admin/AdminAuditPage";
+import { AdminSettingsPage } from "@/pages/admin/AdminSettingsPage";
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -35,8 +44,19 @@ export function App() {
           {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/auth" element={<AuthPage />} />
+          <Route path="/admin/login" element={<AdminLoginPage />} />
 
-          {/* Authenticated Routes */}
+          {/* SuperAdmin Executive Console */}
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="dashboard" element={<AdminDashboardPage />} />
+            <Route path="hotels" element={<AdminHotelsPage />} />
+            <Route path="users" element={<AdminUsersPage />} />
+            <Route path="audit" element={<AdminAuditPage />} />
+            <Route path="settings" element={<AdminSettingsPage />} />
+          </Route>
+
+          {/* Authenticated Restaurant Tenant Routes */}
           <Route element={<AuthenticatedLayout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/integrations" element={<IntegrationsPage />} />

@@ -3,9 +3,9 @@ import { Logo } from "@/components/site/Logo";
 import { cn } from "@/lib/utils";
 import { visibleModules, primaryRoleLabel } from "@/lib/roles";
 
-export function AppSidebar({ roles }) {
+export function AppSidebar({ roles = [], enabledModules = null }) {
   const { pathname } = useLocation();
-  const nav = visibleModules(roles);
+  const nav = visibleModules(roles, enabledModules);
   const roleLabel = primaryRoleLabel(roles);
   return (
     <aside className="sticky top-0 hidden h-screen w-64 shrink-0 border-r border-border/60 bg-card/50 md:flex md:flex-col">

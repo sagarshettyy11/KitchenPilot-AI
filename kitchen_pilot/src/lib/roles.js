@@ -125,8 +125,25 @@ export function hasAnyRole(userRoles, allowed) {
   return allowed.some((r) => userRoles.includes(r));
 }
 
-export function visibleModules(userRoles) {
-  return MODULES.filter((m) => hasAnyRole(userRoles, m.roles));
+export function visibleModules(userRoles = [], enabledModules = null) {
+  return MODULES.filter((m) => {
+    // Role check
+    const hasRole = hasAnyRole(userRoles, m.roles);
+    if (!hasRole) return false;
+
+    // SuperAdmin always has full access
+    if (userRoles.includes("super_admin")) return true;
+
+    // Dashboard & Settings are always visible if role allows
+    if (m.id === "dashboard" || m.id === "settings") return true;
+
+    // If enabledModules list is provided from hotel provisioning, check it
+    if (Array.isArray(enabledModules) && enabledModules.length > 0) {
+      return enabledModules.includes(m.id);
+    }
+
+    return true;
+  });
 }
 
 export function moduleByPath(path) {

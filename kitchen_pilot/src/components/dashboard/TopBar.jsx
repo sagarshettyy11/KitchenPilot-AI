@@ -1,7 +1,7 @@
-import { Bell, Search } from "lucide-react";
+import { Bell, Search, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { toast } from "sonner";
 import { primaryRoleLabel } from "@/lib/roles";
 
@@ -14,6 +14,8 @@ export function TopBar({ email, roles = [] }) {
   }
   const initial = (email ?? "U").charAt(0).toUpperCase();
   const roleLabel = primaryRoleLabel(roles);
+  const isSuperAdmin = roles.includes("super_admin") || email === "admin@kitchenpilot.in";
+
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border/60 bg-background/70 px-4 backdrop-blur md:px-6">
       <div className="relative flex-1 max-w-md">
@@ -23,6 +25,17 @@ export function TopBar({ email, roles = [] }) {
           className="h-10 w-full rounded-xl border border-border/60 bg-card pl-9 pr-3 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
         />
       </div>
+
+      {isSuperAdmin && (
+        <Link
+          to="/admin/dashboard"
+          className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-950 text-indigo-300 hover:bg-indigo-900 border border-indigo-700/60 text-xs font-bold shadow-sm transition-all"
+        >
+          <ShieldCheck className="h-4 w-4 text-indigo-400" />
+          SuperAdmin Console
+        </Link>
+      )}
+
       <Button variant="ghost" size="icon" className="rounded-xl">
         <Bell className="h-4 w-4" />
       </Button>

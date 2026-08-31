@@ -1,0 +1,5 @@
+# Agent & IDE local configs (contains sensitive credentials)
+.agents/
+.agent/
+_agents/
+_agent/
